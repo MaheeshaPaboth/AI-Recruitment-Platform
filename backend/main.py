@@ -1,4 +1,3 @@
-
 import io
 import os
 import json
@@ -12,7 +11,6 @@ from pypdf import PdfReader
 from google import genai
 from google.genai import types
 
-
 # ==========================================
 # 1. Load Environment Variables
 # ==========================================
@@ -22,9 +20,7 @@ load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 
 if not api_key:
-    raise RuntimeError(
-        "GEMINI_API_KEY is missing from .env file"
-    )
+    raise RuntimeError("GEMINI_API_KEY is missing from .env file")
 
 
 # ==========================================
@@ -33,15 +29,9 @@ if not api_key:
 
 client = genai.Client(api_key=api_key)
 
-GEMINI_MODEL = os.getenv(
-    "GEMINI_MODEL",
-    "gemini-3.5-flash"
-)
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
 
-FALLBACK_MODEL = os.getenv(
-    "GEMINI_FALLBACK_MODEL",
-    "gemini-3.5-flash-lite"
-)
+FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-3.5-flash-lite")
 
 
 # ==========================================
@@ -68,13 +58,7 @@ Collaborate with software engineering teams.
 # 4. Required Skills
 # ==========================================
 
-REQUIRED_SKILLS = [
-    "Java",
-    "Spring Boot",
-    "React",
-    "PostgreSQL",
-    "Docker"
-]
+REQUIRED_SKILLS = ["Java", "Spring Boot", "React", "PostgreSQL", "Docker"]
 
 
 # ==========================================
@@ -84,45 +68,16 @@ REQUIRED_SKILLS = [
 CV_ANALYSIS_SCHEMA = {
     "type": "OBJECT",
     "properties": {
-        "candidate_name": {
-            "type": "STRING"
-        },
-        "years_of_experience": {
-            "type": "STRING"
-        },
-        "top_skills": {
-            "type": "ARRAY",
-            "items": {
-                "type": "STRING"
-            }
-        },
-        "education": {
-            "type": "STRING"
-        },
-        "summary": {
-            "type": "STRING"
-        },
-        "match_score": {
-            "type": "INTEGER"
-        },
-        "matched_skills": {
-            "type": "ARRAY",
-            "items": {
-                "type": "STRING"
-            }
-        },
-        "missing_skills": {
-            "type": "ARRAY",
-            "items": {
-                "type": "STRING"
-            }
-        },
-        "brief_justification": {
-            "type": "STRING"
-        },
-        "recommendation": {
-            "type": "STRING"
-        }
+        "candidate_name": {"type": "STRING"},
+        "years_of_experience": {"type": "STRING"},
+        "top_skills": {"type": "ARRAY", "items": {"type": "STRING"}},
+        "education": {"type": "STRING"},
+        "summary": {"type": "STRING"},
+        "match_score": {"type": "INTEGER"},
+        "matched_skills": {"type": "ARRAY", "items": {"type": "STRING"}},
+        "missing_skills": {"type": "ARRAY", "items": {"type": "STRING"}},
+        "brief_justification": {"type": "STRING"},
+        "recommendation": {"type": "STRING"},
     },
     "required": [
         "candidate_name",
@@ -134,8 +89,8 @@ CV_ANALYSIS_SCHEMA = {
         "matched_skills",
         "missing_skills",
         "brief_justification",
-        "recommendation"
-    ]
+        "recommendation",
+    ],
 }
 
 
@@ -146,7 +101,7 @@ CV_ANALYSIS_SCHEMA = {
 app = FastAPI(
     title="AI Recruitment Platform",
     description="Backend API for AI Recruitment System",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 
@@ -158,7 +113,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"
+        "http://127.0.0.1:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -170,6 +127,7 @@ app.add_middleware(
 # 8. Pydantic Model
 # ==========================================
 
+
 class Job(BaseModel):
     title: str
     description: str
@@ -180,24 +138,24 @@ class Job(BaseModel):
 # 9. Health Check API
 # ==========================================
 
+
 @app.get("/")
 async def health_check():
 
-    return {
-        "status": "AI Recruitment API is running"
-    }
+    return {"status": "AI Recruitment API is running"}
 
 
 # ==========================================
 # 10. About API
 # ==========================================
 
+
 @app.get("/about")
 async def about():
 
     return {
         "project": "AI Recruitment Platform",
-        "technology": "Python + FastAPI + Gemini AI"
+        "technology": "Python + FastAPI + Gemini AI",
     }
 
 
@@ -205,18 +163,17 @@ async def about():
 # 11. Create Job API
 # ==========================================
 
+
 @app.post("/jobs")
 async def create_job(job: Job):
 
-    return {
-        "message": f"Job '{job.title}' created successfully!",
-        "job_details": job
-    }
+    return {"message": f"Job '{job.title}' created successfully!", "job_details": job}
 
 
 # ==========================================
 # 12. Calculate Match Score
 # ==========================================
+
 
 def calculate_match_score(matched_skills):
 
@@ -236,6 +193,7 @@ def calculate_match_score(matched_skills):
 # 13. Upload CV and Analyze with Gemini AI
 # ==========================================
 
+
 @app.post("/upload-cv")
 async def upload_cv(file: UploadFile = File(...)):
 
@@ -247,10 +205,7 @@ async def upload_cv(file: UploadFile = File(...)):
 
         if file.content_type != "application/pdf":
 
-            raise HTTPException(
-                status_code=400,
-                detail="Only PDF files are allowed"
-            )
+            raise HTTPException(status_code=400, detail="Only PDF files are allowed")
 
         # --------------------------------------
         # Step 2: Read PDF into RAM
@@ -262,26 +217,19 @@ async def upload_cv(file: UploadFile = File(...)):
 
         if not pdf_bytes:
 
-            raise HTTPException(
-                status_code=400,
-                detail="Uploaded PDF is empty"
-            )
+            raise HTTPException(status_code=400, detail="Uploaded PDF is empty")
 
         if len(pdf_bytes) > MAX_FILE_SIZE:
 
             raise HTTPException(
-                status_code=413,
-                detail="PDF file must be smaller than 10 MB"
+                status_code=413, detail="PDF file must be smaller than 10 MB"
             )
 
         # Check PDF signature
 
         if not pdf_bytes.startswith(b"%PDF-"):
 
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid PDF file"
-            )
+            raise HTTPException(status_code=400, detail="Invalid PDF file")
 
         # --------------------------------------
         # Step 3: Extract Text from PDF
@@ -296,8 +244,7 @@ async def upload_cv(file: UploadFile = File(...)):
             if reader.is_encrypted:
 
                 raise HTTPException(
-                    status_code=400,
-                    detail="Encrypted PDFs are not supported"
+                    status_code=400, detail="Encrypted PDFs are not supported"
                 )
 
             cv_text = ""
@@ -309,8 +256,7 @@ async def upload_cv(file: UploadFile = File(...)):
             if not cv_text.strip():
 
                 raise HTTPException(
-                    status_code=400,
-                    detail="No readable text found in PDF"
+                    status_code=400, detail="No readable text found in PDF"
                 )
 
             # Limit extracted text
@@ -326,10 +272,7 @@ async def upload_cv(file: UploadFile = File(...)):
             print(f"PDF extraction error: {repr(e)}")
             traceback.print_exc()
 
-            raise HTTPException(
-                status_code=400,
-                detail="Could not read this PDF"
-            )
+            raise HTTPException(status_code=400, detail="Could not read this PDF")
 
         # --------------------------------------
         # Step 4: Create AI Prompt
@@ -393,28 +336,23 @@ Do not include markdown or text outside JSON.
         config = types.GenerateContentConfig(
             response_mime_type="application/json",
             response_json_schema=CV_ANALYSIS_SCHEMA,
-            temperature=0.2
+            temperature=0.2,
         )
 
         try:
 
             response = await client.aio.models.generate_content(
-                model=GEMINI_MODEL,
-                contents=prompt,
-                config=config
+                model=GEMINI_MODEL, contents=prompt, config=config
             )
 
         except Exception as model_err:
 
             print(
-                f"Primary model failed: {repr(model_err)}. "
-                "Trying fallback model..."
+                f"Primary model failed: {repr(model_err)}. " "Trying fallback model..."
             )
 
             response = await client.aio.models.generate_content(
-                model=FALLBACK_MODEL,
-                contents=prompt,
-                config=config
+                model=FALLBACK_MODEL, contents=prompt, config=config
             )
 
         # --------------------------------------
@@ -426,8 +364,7 @@ Do not include markdown or text outside JSON.
         if not ai_raw_text:
 
             raise HTTPException(
-                status_code=502,
-                detail="Gemini returned an empty response"
+                status_code=502, detail="Gemini returned an empty response"
             )
 
         # --------------------------------------
@@ -440,25 +377,17 @@ Do not include markdown or text outside JSON.
 
         except (json.JSONDecodeError, TypeError):
 
-            raise HTTPException(
-                status_code=502,
-                detail="AI returned invalid JSON"
-            )
+            raise HTTPException(status_code=502, detail="AI returned invalid JSON")
 
         # --------------------------------------
         # Step 8: Validate AI Response
         # --------------------------------------
 
-        ai_matched_skills = ai_data.get(
-            "matched_skills", []
-        )
+        ai_matched_skills = ai_data.get("matched_skills", [])
 
         if not isinstance(ai_matched_skills, list):
 
-            raise HTTPException(
-                status_code=502,
-                detail="Invalid matched skills format"
-            )
+            raise HTTPException(status_code=502, detail="Invalid matched skills format")
 
         # Normalize skill names
 
@@ -471,26 +400,20 @@ Do not include markdown or text outside JSON.
         # Accept only required skills
 
         matched_skills = [
-            skill
-            for skill in REQUIRED_SKILLS
-            if skill.casefold() in normalized_matches
+            skill for skill in REQUIRED_SKILLS if skill.casefold() in normalized_matches
         ]
 
         # Find missing skills
 
         missing_skills = [
-            skill
-            for skill in REQUIRED_SKILLS
-            if skill not in matched_skills
+            skill for skill in REQUIRED_SKILLS if skill not in matched_skills
         ]
 
         # --------------------------------------
         # Step 9: Calculate Final Match Score
         # --------------------------------------
 
-        match_score = calculate_match_score(
-            matched_skills
-        )
+        match_score = calculate_match_score(matched_skills)
 
         # Update analysis
 
@@ -521,7 +444,7 @@ Do not include markdown or text outside JSON.
         return {
             "filename": file.filename,
             "message": "CV analyzed successfully!",
-            "analysis": ai_data
+            "analysis": ai_data,
         }
 
     except HTTPException:
@@ -542,10 +465,7 @@ Do not include markdown or text outside JSON.
 
         print("=======================================\n")
 
-        raise HTTPException(
-            status_code=502,
-            detail=f"CV analysis failed: {str(e)}"
-        )
+        raise HTTPException(status_code=502, detail=f"CV analysis failed: {str(e)}")
 
     finally:
 
@@ -555,6 +475,7 @@ Do not include markdown or text outside JSON.
 # ==========================================
 # 14. Close Gemini Client
 # ==========================================
+
 
 @app.on_event("shutdown")
 async def shutdown_event():
